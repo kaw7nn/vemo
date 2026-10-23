@@ -2,7 +2,7 @@
 // conversa com a aba sincronizada e com o popup, e troca de vídeo quando a
 // outra pessoa troca.
 
-const DEFAULT_SERVER = 'ws://localhost:8787';
+const DEFAULT_SERVER = 'wss://vemo.kawannmarcelo7.workers.dev';
 const PING_MS = 15000; // também mantém o service worker vivo
 const ANNOUNCE_WINDOW_MS = 8000; // logo após trocar de vídeo, ignoramos o vídeo antigo do outro lado
 const NAV_GRACE_MS = 15000;
@@ -86,7 +86,10 @@ function connect() {
   if (!session) return;
   let socket;
   try {
-    socket = new WebSocket(session.server);
+    // O código da sala vai no endereço: o servidor usa ele para achar a sala.
+    const url = new URL(session.server);
+    url.searchParams.set('room', session.room);
+    socket = new WebSocket(url.href);
   } catch {
     lastError = 'servidor-invalido';
     leave();

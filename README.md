@@ -18,7 +18,7 @@ Nenhum vídeo passa pela extensão nem pelo servidor. Só trafegam comandos pequ
   - **Pequenas diferenças:** quem fez a última ação manda um "batimento" a cada 4 s; o outro corrige se ficar mais de 2 s fora.
   - **Autoplay:** logo depois de abrir o vídeo da sala, o autoplay da página não passa por cima da sala. Um clique ou tecla de verdade vale normalmente.
 - **Background** (`extension/background.js`): mantém a conexão com o servidor e leva a aba para o mesmo vídeo quando a outra pessoa troca. Só navega para endereços `https` do YouTube e da Netflix.
-- **Servidor** (`server/`): repassa mensagens entre as pessoas da sala e guarda o último estado, pra quem entrar depois já cair no ponto certo.
+- **Servidor de salas** (`server/worker.js`): um Worker do Cloudflare com um Durable Object por sala. Repassa mensagens entre as pessoas da sala e guarda o último estado, pra quem entrar depois já cair no ponto certo. As conexões hibernam: sala parada não consome nada. Sala vazia é apagada depois de 30 minutos.
 
 ## Rodando
 
@@ -26,8 +26,10 @@ Precisa de Node 20 ou mais novo e de um navegador baseado em Chromium (Chrome, B
 
 ```bash
 npm install
-npm run server          # ws://localhost:8787  (mude com PORT=9000 npm run server)
+npm run server          # servidor local (wrangler dev) em ws://localhost:8787
 ```
+
+A extensão já vem apontando para o servidor de produção. Para desenvolver contra o local, troque o endereço em **Configurações** no popup.
 
 ### Instalar a extensão
 
@@ -37,20 +39,28 @@ npm run server          # ws://localhost:8787  (mude com PORT=9000 npm run serve
 
 ### Usar
 
-1. Nas **Configurações** do popup, ponham o seu nome e o **mesmo endereço de servidor**.
+1. Nas **Configurações** do popup, cada um põe o seu nome. O servidor já vem configurado.
 2. Uma pessoa abre um vídeo e clica em **Criar sala nesta aba**. Aparece um código.
 3. A outra digita o código e clica em **Entrar**. A aba dela vai pro mesmo vídeo e no mesmo ponto.
 
-### Pra outra pessoa, em outra casa, alcançar o servidor
+## Produção
 
-O servidor roda na sua máquina, e a outra pessoa precisa de um endereço público até ele. Para testar, sem hospedar nada, dá pra usar um túnel temporário, por exemplo:
+O servidor roda no Cloudflare Workers, com Durable Objects (plano gratuito).
 
 ```bash
-cloudflared tunnel --url http://localhost:8787
-# gera algo como https://xxxx.trycloudflare.com → use wss://xxxx.trycloudflare.com na extensão
+npm run deploy          # publica o Worker (precisa de `npx wrangler login`)
 ```
 
-Para algo permanente, o servidor é um processo Node comum, sem banco de dados, e pode ser hospedado em qualquer lugar que aceite WebSocket. Use sempre `wss://` (com TLS) fora da sua rede.
+Ele também serve a política de privacidade em `/privacidade`.
+
+### Chrome Web Store
+
+```bash
+npm run pack                     # dist/vemo-<versão>.zip
+node scripts/store-assets.js     # capturas e bloco promocional em store/
+```
+
+Textos da ficha, justificativas de permissão e respostas de privacidade: [`store/LISTING.md`](store/LISTING.md).
 
 ## Adicionando um serviço novo
 
@@ -80,7 +90,7 @@ npm test        # servidor e núcleo de sincronização (sem navegador)
 npm run e2e     # dois Chromium reais com a extensão, no YouTube de verdade
 ```
 
-O `e2e` usa `/usr/bin/chromium` (troque com `CHROME=/caminho`). Com `DEBUG=1`, mostra as últimas mensagens de cada lado quando algo falha. Com `HEADFUL=1`, abre as janelas.
+O `test` e o `e2e` sobem o Worker local sozinhos. O `e2e` usa `/usr/bin/chromium` (troque com `CHROME=/caminho`), e com `SERVER=wss://…` roda contra um servidor já no ar. Com `DEBUG=1`, mostra as últimas mensagens de cada lado quando algo falha. Com `HEADFUL=1`, abre as janelas.
 
 ## Limitações conhecidas
 
@@ -88,4 +98,3 @@ O `e2e` usa `/usr/bin/chromium` (troque com `CHROME=/caminho`). Com `DEBUG=1`, m
 - Só Chromium por enquanto. Firefox precisa de ajustes no manifest.
 - Sem chat, voz ou câmera: a ideia é conversar por fora (WhatsApp, Discord etc.).
 - Velocidade de reprodução (1,5x etc.) não é sincronizada.
-- O servidor guarda as salas em memória. Se ele reiniciar, a extensão recria a sala sozinha ao reconectar.

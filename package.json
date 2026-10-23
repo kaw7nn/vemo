@@ -1,11 +1,13 @@
 {
   "name": "vemo",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Extensão para assistir YouTube e Netflix em sincronia com outra pessoa.",
   "type": "commonjs",
   "scripts": {
-    "server": "node server/index.js",
+    "server": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "pack": "node scripts/pack.js",
     "test": "node --test test/*.test.js",
     "check": "node scripts/check.js",
     "e2e": "node test/e2e/youtube.e2e.js"
@@ -17,6 +19,7 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "puppeteer-core": "^24.0.0"
+    "puppeteer-core": "^24.0.0",
+    "wrangler": "^4.152.0"
   }
 }

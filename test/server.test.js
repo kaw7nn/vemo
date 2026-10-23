@@ -1,10 +1,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const WebSocket = require('ws');
-const { startServer } = require('../server');
+const { startLocalServer } = require('./helpers/local-server');
 
-function client(port) {
-  const ws = new WebSocket(`ws://127.0.0.1:${port}`);
+function client(port, room = 'ABC123') {
+  const ws = new WebSocket(`ws://127.0.0.1:${port}/?room=${room}`);
   const queue = [];
   const waiters = [];
   ws.on('message', (raw) => {
@@ -36,17 +36,25 @@ function client(port) {
 }
 
 test('servidor de salas', async (t) => {
-  const srv = await startServer({ port: 0, host: '127.0.0.1', log: () => {} });
+  const srv = await startLocalServer();
   t.after(() => srv.close());
 
-  const a = client(srv.port);
+  await t.test('entrar numa sala que não existe falha', async () => {
+    const x = client(srv.port, 'NAOEXISTE');
+    await x.opened;
+    x.send({ t: 'hello', create: false });
+    assert.equal((await x.next('error')).code, 'sala-nao-encontrada');
+    x.ws.close();
+  });
+
+  await t.test('código de sala inválido é recusado', async () => {
+    const x = client(srv.port, 'x!');
+    assert.equal((await x.next('error')).code, 'codigo-invalido');
+  });
+
+  const a = client(srv.port, 'abc123');
   const b = client(srv.port);
   await Promise.all([a.opened, b.opened]);
-
-  await t.test('entrar numa sala que não existe falha', async () => {
-    b.send({ t: 'hello', room: 'NAOEXISTE', create: false });
-    assert.equal((await b.next('error')).code, 'sala-nao-encontrada');
-  });
 
   await t.test('criar e entrar', async () => {
     a.send({ t: 'hello', room: 'abc123', name: 'Ana', create: true });
@@ -82,6 +90,11 @@ test('servidor de salas', async (t) => {
   await t.test('estado inválido é descartado', async () => {
     a.send({ t: 'state', playing: 'sim', time: 1 });
     a.send({ t: 'state', playing: true, time: 'x' });
+    await assert.rejects(b.next('state'));
+  });
+
+  await t.test('mensagem gigante é ignorada', async () => {
+    a.send({ t: 'state', playing: true, time: 1, title: 'x'.repeat(9000) });
     await assert.rejects(b.next('state'));
   });
 

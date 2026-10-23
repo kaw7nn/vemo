@@ -7,7 +7,7 @@ const os = require('node:os');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const puppeteer = require('puppeteer-core');
-const { startServer } = require('../../server');
+const { startLocalServer } = require('../helpers/local-server');
 
 const EXTENSION = path.join(__dirname, '../../extension');
 const CHROME = process.env.CHROME || '/usr/bin/chromium';
@@ -75,8 +75,10 @@ async function tabId(worker) {
 }
 
 async function main() {
-  const srv = await startServer({ port: 0, host: '127.0.0.1', log: (m) => console.log('  servidor:', m) });
-  const serverUrl = `ws://127.0.0.1:${srv.port}`;
+  // SERVER=wss://... roda contra um servidor já no ar (ex.: produção).
+  const srv = process.env.SERVER ? { url: process.env.SERVER, close: async () => {} } : await startLocalServer();
+  const serverUrl = srv.url;
+  const room = `E2E${Date.now().toString(36).toUpperCase().slice(-6)}`;
   const A = await openBrowser('Ana', serverUrl);
   const B = await openBrowser('Beto', serverUrl);
   const results = [];
@@ -93,7 +95,7 @@ async function main() {
       await waitVideoReady(A.page, 'Ana');
       await A.page.evaluate(() => document.querySelector('#movie_player video').pause());
       const id = await tabId(A.worker);
-      await A.worker.evaluate((tabId) => startSession({ room: 'TESTE1', create: true, tabId }), id);
+      await A.worker.evaluate(({ room, tabId }) => startSession({ room, create: true, tabId }), { room, tabId: id });
       await waitFor(() => A.worker.evaluate(() => connected && lastState?.mediaKey === 'youtube:aqz-KE-bpKQ'), 'sala criada com o vídeo da Ana');
     });
 
@@ -101,7 +103,7 @@ async function main() {
       await B.page.goto('https://www.youtube.com/', { waitUntil: 'domcontentloaded' });
       await skipConsent(B.page);
       const id = await tabId(B.worker);
-      await B.worker.evaluate((tabId) => startSession({ room: 'TESTE1', create: false, tabId }), id);
+      await B.worker.evaluate(({ room, tabId }) => startSession({ room, create: false, tabId }), { room, tabId: id });
       await waitFor(() => B.page.url().includes('aqz-KE-bpKQ'), 'Beto no vídeo da sala', 30000);
       await waitVideoReady(B.page, 'Beto');
     });
