@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Vemo</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <img src="../icons/32.png" alt="" width="20" height="20" />
+      <h1>Vemo</h1>
+    </header>
+
+    <p id="error" class="error" hidden></p>
+
+    <section id="out" hidden>
+      <button id="create" class="primary">Criar sala nesta aba</button>
+      <p class="hint">Abra um vídeo do YouTube ou da Netflix nesta aba antes ou depois de criar.</p>
+
+      <form id="join-form" class="join">
+        <label for="code">Tenho um código</label>
+        <div class="row">
+          <input id="code" autocomplete="off" spellcheck="false" maxlength="12" placeholder="EX: K7QM2P" />
+          <button type="submit">Entrar</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="in" hidden>
+      <div class="code-block">
+        <span class="label">Código da sala</span>
+        <button id="copy" class="code" title="Copiar código"></button>
+        <span id="copied" class="copied" hidden>Copiado</span>
+      </div>
+
+      <p id="connection" class="connection"></p>
+      <ul id="peers" class="peers"></ul>
+      <p id="media" class="media" hidden></p>
+
+      <p id="other-tab" class="hint" hidden>A sala está ligada a outra aba. <button id="go-tab" class="link">Ir para ela</button></p>
+
+      <button id="leave" class="ghost">Sair da sala</button>
+    </section>
+
+    <details id="settings">
+      <summary>Configurações</summary>
+      <form id="settings-form">
+        <label for="name">Seu nome</label>
+        <input id="name" maxlength="40" placeholder="Como a outra pessoa vê você" />
+        <label for="server">Servidor de salas</label>
+        <input id="server" spellcheck="false" placeholder="ws://localhost:8787" />
+        <p class="hint">As duas pessoas precisam usar o mesmo servidor.</p>
+        <button type="submit">Salvar</button>
+      </form>
+    </details>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
