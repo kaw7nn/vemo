@@ -29,7 +29,7 @@ const STATUS_IN = {
   roomMedia: { title: 'Documentário da noite' },
 };
 
-const FONTS = `<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500&display=swap" rel="stylesheet">`;
+const FONTS = `<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&display=swap" rel="stylesheet">`;
 
 async function popupShot(browser, status) {
   const page = await browser.newPage();
@@ -53,10 +53,10 @@ async function popupShot(browser, status) {
 const base = `
   :root { --bg: #16131f; --surface: #211d2c; --line: #342e42; --text: #f5efe6; --muted: #a69fb4; --accent: #ff6b4a; }
   * { box-sizing: border-box; margin: 0; }
-  body { width: 1280px; height: 800px; overflow: hidden; background: var(--bg); color: var(--text); font-family: Inter, sans-serif; }
-  .eyebrow { display: flex; align-items: center; gap: 10px; font: 500 15px Inter; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  body { width: 1280px; height: 800px; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Bricolage Grotesque', sans-serif; }
+  .eyebrow { display: flex; align-items: center; gap: 10px; font: 500 15px 'Bricolage Grotesque'; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
   h1 { font: 700 60px/1.04 'Bricolage Grotesque'; letter-spacing: -0.02em; }
-  p.sub { font: 400 20px/1.5 Inter; color: var(--muted); }
+  p.sub { font: 400 20px/1.5 'Bricolage Grotesque'; color: var(--muted); }
   .popup { border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0,0,0,.45); display: block; }
 `;
 
@@ -103,9 +103,9 @@ function screenshot2(icon) {
     .bar { position: relative; height: 6px; margin: 18px 4px 10px; border-radius: 3px; background: var(--line); }
     .fill { width: 37%; height: 100%; border-radius: 3px; background: var(--accent); }
     .knob { position: absolute; left: 37%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--text); }
-    .row { display: flex; justify-content: space-between; font: 500 15px Inter; color: var(--muted); padding: 0 4px; }
-    .who { margin-top: 14px; padding: 0 4px; font: 500 18px Inter; }
-    .link { display: grid; place-items: center; gap: 10px; color: var(--accent); font: 500 13px Inter; letter-spacing: .1em; text-transform: uppercase; }
+    .row { display: flex; justify-content: space-between; font: 500 15px 'Bricolage Grotesque'; color: var(--muted); padding: 0 4px; }
+    .who { margin-top: 14px; padding: 0 4px; font: 500 18px 'Bricolage Grotesque'; }
+    .link { display: grid; place-items: center; gap: 10px; color: var(--accent); font: 500 13px 'Bricolage Grotesque'; letter-spacing: .1em; text-transform: uppercase; }
     .link .line { width: 56px; height: 2px; background: repeating-linear-gradient(90deg, var(--accent) 0 8px, transparent 8px 14px); }
   </style></head><body><div class="wrap">
     <div class="head">
@@ -125,7 +125,7 @@ function promo(icon) {
     body { width: 440px; height: 280px; display: grid; place-items: center; }
     .box { display: grid; justify-items: center; gap: 12px; }
     .name { font: 700 58px/1 'Bricolage Grotesque'; letter-spacing: -0.02em; }
-    .tag { font: 400 17px Inter; color: var(--muted); }
+    .tag { font: 400 17px 'Bricolage Grotesque'; color: var(--muted); }
   </style></head><body><div class="box">
     <img src="${icon}" width="76" height="76">
     <div class="name">Vemo</div>
